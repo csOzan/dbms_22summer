@@ -17,8 +17,9 @@ app.use(function(req,res,next){
 // Create
 app.post("/iller", async (req, res) => {
     try {
-        const {adi} = req.body
-        const newil = await pool.query("INSERT INTO iller (adi) VALUES ($1) RETURNING *", [adi]);
+        const {description} = req.body
+        console.log(description);
+        const newil = await pool.query(`INSERT INTO iller (il_adi) VALUES ($1) RETURNING *`, [description]);
         res.json(newil.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -37,7 +38,7 @@ app.get("/iller", async (req, res) => {
 app.get("/iller/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const il = await pool.query("SELECT * FROM iller WHERE il_ID = $1",[id]);
+        const il = await pool.query("SELECT * FROM iller WHERE 'il_ID' = $1",[id]);
 
         res.json(il.rows[0])
     } catch (error) {
@@ -49,8 +50,9 @@ app.put("/iller/:id", async (req, res) => {
     try {
         const {id} = req.params;  // where
         const {adi} = req.body; // set
-
-        const updateil = await pool.query("UPDATE iller SET adi = $1 WHERE il_ID = $2",[adi, id]);
+        console.log(id);
+        let addi = "'" + adi +"'";
+        const updateil = await pool.query(`UPDATE iller SET "il_adi" = $1 WHERE "il_ID" = $2`,[addi, id]);
 
         res.json("Il guncellendi");
     } catch (err) {
@@ -61,7 +63,7 @@ app.put("/iller/:id", async (req, res) => {
 app.delete("/iller/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteil = await pool.query("DELETE FROM iller WHERE il_ID = $1", [id]);
+        const deleteil = await pool.query(`DELETE FROM iller WHERE "il_ID" = $1`, [id]);
         res.json("Il Silindi!");
     } catch (err) {
         console.error(err.message);
@@ -74,8 +76,8 @@ app.delete("/iller/:id", async(req,res) => {
 // Create
 app.post("/ilceler", async (req, res) => {
     try {
-        const {adi} = req.body
-        const newilce = await pool.query("INSERT INTO ilceler (ilce_adi) VALUES ($1) RETURNING *", [adi]);
+        const {description} = req.body
+        const newilce = await pool.query("INSERT INTO ilceler (ilce_adi) VALUES ($1) RETURNING *", [description ]);
         res.json(newilce.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -128,20 +130,6 @@ app.delete("/ilceler/:id", async(req,res) => {
         console.error(err.message);
     }
 })
-app.post("/test/", async (req, res) => {
-    let id = req.query.id;
-    
-    let ot = req.query.ot;
-    
-    console.log(id);
-    try {
-        //const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        //res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
 // TABLE Iletisim_bilgileri // 
 
 // Create
@@ -151,7 +139,7 @@ app.post("/iletisimBilgileri", async (req, res) => {
         let il_id = req.query.ilId;
         let ilce_id = req.query.ilce_id;
         const newiletisimbilgisi= await pool.query("INSERT INTO iletisim_bilgileri (telefon_no, il_ID, ilce_ID) VALUES ($1, $2, $3) RETURNING *", [telefon_no,il_id,ilce_id]);
-        res.json(newTodo.rows[0]);
+        res.json(newiletisimbilgisi.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
@@ -255,7 +243,7 @@ app.put("/saticilar/:id", async (req, res) => {
         let puan = req.query.puan;
         let arac_sayisi= req.query.aracSayisi;
         const { id } = req.params;
-        const updateTodo = await pool.query("UPDATE saticilar SET ad = $1, soyad = $2, puan= $3, arac_sayisi= $4 WHERE satici_ID = $5",[ad,soyad,puan,arac_sayisi, id]);
+        const updatesatici = await pool.query("UPDATE saticilar SET ad = $1, soyad = $2, puan= $3, arac_sayisi= $4 WHERE satici_ID = $5",[ad,soyad,puan,arac_sayisi, id]);
 
         res.json("Satici updated");
     } catch (err) {
@@ -322,7 +310,7 @@ app.put("/musteriHizmetleri/:id", async (req, res) => {
         let soyad = req.query.soyad;
         let puan = req.query.puan;
         const { id } = req.params;
-        const updateTodo = await pool.query("UPDATE musteri_hizmetleri SET ad = $1, soyad = $2, puan= $3 WHERE musteri_hizmetleri_ID = $4",[ad,soyad,puan, id]);
+        const updatemus = await pool.query("UPDATE musteri_hizmetleri SET ad = $1, soyad = $2, puan= $3 WHERE musteri_hizmetleri_ID = $4",[ad,soyad,puan, id]);
 
         res.json("Musteri Hizmetleri updated");
     } catch (err) {
@@ -864,3 +852,118 @@ app.delete("/basvuru/:id", async(req,res) => {
         console.error(err.message);
     }
 })
+
+// TABLE araclar // 
+
+// Create
+app.post("/araclar", async (req, res) => {
+    try {
+        let marka_adi = req.query.markaadi;
+        let model_adi = req.query.modeladi;
+        let plaka_no = req.query.plakano;
+        let renk_ID = req.query.renkID;
+        let ic_dekor = req.query.icdekor;
+        let koltuk_sayisi = req.query.koltukSayisi;
+        let hasar_kaydi = req.query.hasarKaydi;
+        let kategori_ID = req.query.kategoriID;
+        const newarac= await pool.query("INSERT INTO araclar (Marka_ADI, Model_ADI, Plaka_NO, Renk_ID, Ic_DEKOR, Koltuk_SAYISI, Hasar_KAYDI, Kategori_ID) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", [marka_adi,model_adi,plaka_no,renk_ID,ic_dekor,koltuk_sayisi,hasar_kaydi,kategori_ID]);
+        res.json(newarac.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+// Read
+app.get("/araclar", async (req, res) => {
+    try {
+        const a = await pool.query("SELECT * FROM araclar");
+
+        res.json(a.rows)
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+app.get("/araclar/:id", async (req, res) => {
+    const {id} = req.params
+    try {
+        const bilgi = await pool.query("SELECT * FROM araclar WHERE Arac_ID = $1",[id]);
+
+        res.json(bilgi.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+
+// update a todo
+app.put("/araclar/:id", async (req, res) => {
+    try {
+        const {id} = req.params
+        let marka_adi = req.query.markaadi;
+        let model_adi = req.query.modeladi;
+        let plaka_no = req.query.plakano;
+        let renk_ID = req.query.renkID;
+        let ic_dekor = req.query.icdekor;
+        let koltuk_sayisi = req.query.koltukSayisi;
+        let hasar_kaydi = req.query.hasarKaydi;
+        let kategori_ID = req.query.kategoriID;
+        const newiletisimbilgisi= await pool.query("UPDATE SET araclar Marka_ADI = $1, Model_ADI= $2, Plaka_NO=$3, Renk_ID=$4, Ic_DEKOR=$5, Koltuk_SAYISI=$6, Hasar_KAYDI=$7, Kategori_ID=$8 WHERE Arac_ID = $9", [marka_adi,model_adi,plaka_no,renk_ID,ic_dekor,koltuk_sayisi,hasar_kaydi,kategori_ID, id]);
+        res.json("Iletisim Bilgileri Guncellendi");
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+// Delete
+app.delete("/araclar/:id", async(req,res) => {
+    try {
+        const {id} = req.params;
+        const deletearac = await pool.query("DELETE FROM araclar WHERE Arac_ID = $1", [id]);
+        res.json("Deleted succesfully!");
+    } catch (err) {
+        console.error(err.message);
+    }
+})
+
+
+/// FONSIYONLAR
+app.get("/f/musterisayisi", async (req, res) => {
+    try {
+        const f = await pool.query("SELECT MusteriSayisi()");
+
+        res.json(f.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+app.get("/f/kisisayisi", async (req, res) => {
+    try {
+        const f = await pool.query("SELECT KisiSayisi()");
+
+        res.json(f.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+app.get("/f/ilsil/:id", async (req, res) => {
+    const {id} = req.params
+    try {
+        const f = await pool.query("SELECT IlSil($1)",[id]);
+
+        res.json(f.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+app.get("/f/sil/", async (req, res) => {
+    try {
+        const basvuru = await pool.query("SELECT SaticiMusteriHizSil()");
+
+        res.json(basvuru.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+
+app.listen(5000, () => {
+    console.log("server is listening on 5000");
+} );
