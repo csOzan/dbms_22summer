@@ -396,10 +396,10 @@ app.put("/musteriler/:id", async (req, res) => {
 });
 
 // Delete
-app.delete("/musteriHizmetleri/:id", async(req,res) => {
+app.delete("/musteriler/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deletemh = await pool.query("DELETE FROM musteri_hizmetleri WHERE musteri_hizmetleri_ID = $1", [id]);
+        const deletem = await pool.query("DELETE FROM musteriler WHERE musteri_ID = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
@@ -409,23 +409,111 @@ app.delete("/musteriHizmetleri/:id", async(req,res) => {
 
 
 // TABLE 7 // 
+app.get("/kisiTipleri", async (req, res) => {
+    try {
+        const alltipler = await pool.query("SELECT * FROM kisi_tipleri");
+
+        res.json(alltipler.rows)
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+
+// Read
+app.get("/kisiTipleri/:id", async (req, res) => {
+    const {id} = req.params
+    try {
+        const kisi_tipleri = await pool.query("SELECT * FROM kisi_tipleri WHERE kisi_tipi_ID = $1",[id]);
+
+        res.json(kisi_tipleri.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+
+// TABLE Arac listesi // 
 
 // Create
-app.post("/todos", async (req, res) => {
+app.post("/aracListesi", async (req, res) => {
     try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
+        let arac_ID = req.query.aracID;
+        let musteri_ID = req.query.musteriID;
+        let satici_ID = req.query.saticiID;
+        
+        const arac= await pool.query("INSERT INTO arac_listesi (arac_ID, musteri_ID, satici_ID) VALUES ($1, $2, $3) RETURNING *", [arac_ID, musteri_ID, satici_ID]);
+        
+        res.json(arac.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
 
-app.get("/todos", async (req, res) => {
+// Read
+app.get("/aracListesi", async (req, res) => {
     try {
-        const allTodos = await pool.query("SELECT * FROM todo");
+        const allArac  = await pool.query("SELECT * FROM arac_listesi");
 
-        res.json(allTodos.rows)
+        res.json(allArac.rows)
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+
+app.get("/aracListesi/:id", async (req, res) => {
+    const {id} = req.params
+    try {
+        const m = await pool.query("SELECT * FROM arac_listesi WHERE arac_listesi_ID = $1",[id]);
+
+        res.json(m.rows[0])
+    } catch (error) {
+        console.log(err.message);
+    }
+})
+
+// update a todo
+app.put("/aracListesi/:id", async (req, res) => {
+    try {    
+        let arac_ID = req.query.aracID;
+        let musteri_ID = req.query.musteriID;
+        let satici_ID = req.query.saticiID;
+        const { id } = req.params;
+        const updatearacListesi = await pool.query("UPDATE arac_listesi SET arac_ID = $1, musteri_ID = $2, satici_ID= $3 WHERE arac_listesi_ID = $4",[arac_ID,musteri_ID,satici_ID,id]);
+
+        res.json("Arac Listesi updated");
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+// Delete
+app.delete("/aracListesi/:id", async(req,res) => {
+    try {
+        const {id} = req.params;
+        const deleteal = await pool.query("DELETE FROM arac_listesi WHERE arc_listesi_ID = $1", [id]);
+        res.json("Deleted succesfully!");
+    } catch (err) {
+        console.error(err.message);
+    }
+})
+
+// TABLE Renkler // 
+
+// Create
+app.post("/renkler", async (req, res) => {
+    try {
+        const {adi} = req.body
+        const newrenk = await pool.query("INSERT INTO renkler (renk_adi) VALUES ($1) RETURNING *", [ad]);
+        res.json(newrenk.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+app.get("/renkler", async (req, res) => {
+    try {
+        const allrenkler = await pool.query("SELECT * FROM renkler");
+
+        res.json(allrenkler.rows)
     } catch (error) {
         console.log(err.message);
     }
@@ -434,60 +522,60 @@ app.get("/todos", async (req, res) => {
 
 // Read
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/renkler/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
+        const renk = await pool.query("SELECT * FROM renkler WHERE renk_ID = $1",[id]);
 
-        res.json(Todo.rows[0])
+        res.json(renk.rows[0])
     } catch (error) {
         console.log(err.message);
     }
 })
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/renkler/:id", async (req, res) => {
     try {
         const { id } = req.params;  // where
-        const {description} = req.body; // set
+        const {adi} = req.body; // set
 
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
+        const updaterenk = await pool.query("UPDATE renkler SET description = $1 WHERE renk_ID = $2",[adi, id]);
 
-        res.json("Todo updated");
+        res.json("Renk updated");
     } catch (err) {
         console.error(err.message);
     }
 });
 
 // Delete
-app.delete("/todos/:id", async(req,res) => {
+app.delete("/renkler/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
+        const deleterenk = await pool.query("DELETE FROM renkler WHERE renkler_ID = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
     }
 })
 
-// TABLE 8 // 
+// TABLE arac Kategoriler // 
 
 // Create
-app.post("/todos", async (req, res) => {
+app.post("/aracKategoriler", async (req, res) => {
     try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
+        const {adi} = req.body
+        const newrkategori = await pool.query("INSERT INTO arac_kategoriler (kategori) VALUES ($1) RETURNING *", [ad]);
+        res.json(newrkategori.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
 
-app.get("/todos", async (req, res) => {
+app.get("/aracKategoriler", async (req, res) => {
     try {
-        const allTodos = await pool.query("SELECT * FROM todo");
+        const allKategoriler = await pool.query("SELECT * FROM arac_kategoriler");
 
-        res.json(allTodos.rows)
+        res.json(allKategoriler.rows)
     } catch (error) {
         console.log(err.message);
     }
@@ -496,60 +584,60 @@ app.get("/todos", async (req, res) => {
 
 // Read
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/aracKategoriler/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
+        const kategori = await pool.query("SELECT * FROM arac_kategoriler WHERE kategori_ID = $1",[id]);
 
-        res.json(Todo.rows[0])
+        res.json(kategori.rows[0])
     } catch (error) {
         console.log(err.message);
     }
 })
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/aracKategoriler/:id", async (req, res) => {
     try {
         const { id } = req.params;  // where
-        const {description} = req.body; // set
+        const {adi} = req.body; // set
 
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
+        const updatekategori = await pool.query("UPDATE arac_kategoriler SET kategori = $1 WHERE kategori_ID = $2",[adi, id]);
 
-        res.json("Todo updated");
+        res.json("arac kategori updated");
     } catch (err) {
         console.error(err.message);
     }
 });
 
 // Delete
-app.delete("/todos/:id", async(req,res) => {
+app.delete("/aracKategoriler/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
+        const deletekategori = await pool.query("DELETE FROM arac_kategoriler WHERE kategori_ID = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
     }
 })
 
-// TABLE 9 // 
 
-// Create
-app.post("/todos", async (req, res) => {
+// Table Basvuru
+
+app.post("/basvuru", async (req, res) => {
     try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
+        const {adi} = req.body
+        const newbas = await pool.query("INSERT INTO basvuru (basvuruadi) VALUES ($1) RETURNING *", [ad]);
+        res.json(newbas.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
 
-app.get("/todos", async (req, res) => {
+app.get("/basvuru", async (req, res) => {
     try {
-        const allTodos = await pool.query("SELECT * FROM todo");
+        const allbasvuru = await pool.query("SELECT * FROM basvuru");
 
-        res.json(allTodos.rows)
+        res.json(allbasvuru.rows)
     } catch (error) {
         console.log(err.message);
     }
@@ -558,60 +646,59 @@ app.get("/todos", async (req, res) => {
 
 // Read
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/basvuru/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
+        const basvuru = await pool.query("SELECT * FROM basvuru WHERE basvuru_ID = $1",[id]);
 
-        res.json(Todo.rows[0])
+        res.json(basvuru.rows[0])
     } catch (error) {
         console.log(err.message);
     }
 })
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/basvuru/:id", async (req, res) => {
     try {
         const { id } = req.params;  // where
-        const {description} = req.body; // set
+        const {adi} = req.body; // set
 
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
+        const updatebasvuru = await pool.query("UPDATE basvuru SET basvuruadi = $1 WHERE basvuru_ID = $2",[adi, id]);
 
-        res.json("Todo updated");
+        res.json("Basvuru updated");
     } catch (err) {
         console.error(err.message);
     }
 });
 
 // Delete
-app.delete("/todos/:id", async(req,res) => {
+app.delete("/basvuru/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
+        const deletebasvuru = await pool.query("DELETE FROM basvuru WHERE basvuru_ID = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
     }
 })
+// TABLE Odeme Bilgisi// 
 
-// TABLE 10 // 
-
-// Create
-app.post("/todos", async (req, res) => {
+app.post("/odemeBilgisi", async (req, res) => {
     try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
+        let basvuru = req.query.basvuru;
+        let ornek = req.query.ornek
+        const newob = await pool.query("INSERT INTO odemebilgisi (basvuru, ornekleme) VALUES ($1, $2) RETURNING *", [basvuru,ornek]);
+        res.json(newob.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
 
-app.get("/todos", async (req, res) => {
+app.get("/odemeBilgisi", async (req, res) => {
     try {
-        const allTodos = await pool.query("SELECT * FROM todo");
+        const allbilgi = await pool.query("SELECT * FROM odemebilgisi");
 
-        res.json(allTodos.rows)
+        res.json(allbilgi.rows)
     } catch (error) {
         console.log(err.message);
     }
@@ -620,61 +707,59 @@ app.get("/todos", async (req, res) => {
 
 // Read
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/odemeBilgisi/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
+        const bilgi = await pool.query("SELECT * FROM odemebilgisi WHERE kredibilgisi = $1",[id]);
 
-        res.json(Todo.rows[0])
+        res.json(bilgi.rows[0])
     } catch (error) {
         console.log(err.message);
     }
 })
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/odemeBilgisi/:id", async (req, res) => {
     try {
         const { id } = req.params;  // where
-        const {description} = req.body; // set
+        let basvuru = req.query.basvuru;
+        let ornek = req.query.ornek
+        const updatebilgi = await pool.query("UPDATE odemebilgisi SET basvuru = $1, ornek = $2 WHERE kredibilgisi = $3",[basvuru,ornek, id]);
 
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
+        res.json("Bilgi updated");
     } catch (err) {
         console.error(err.message);
     }
 });
 
 // Delete
-app.delete("/todos/:id", async(req,res) => {
+app.delete("/odemeBilgisi/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
+        const deleteOdeme = await pool.query("DELETE FROM odemeBilgisi WHERE kredibilgisi = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
     }
 })
+// TABLE Musteri Degerlendirmesi // 
 
-
-// TABLE 11 // 
-
-// Create
-app.post("/todos", async (req, res) => {
+app.post("/degerlendirme", async (req, res) => {
     try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
+        let kisi_ID = req.query.kisiID
+        let puan = req.query.puan
+        const newdeg = await pool.query("INSERT INTO musteri_degerlendirmesi (kisi_ID, puan) VALUES ($1, $2) RETURNING *", [kisi_ID, puan]);
+        res.json(newdeg.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
 
-app.get("/todos", async (req, res) => {
+app.get("/degerlendirme", async (req, res) => {
     try {
-        const allTodos = await pool.query("SELECT * FROM todo");
+        const alldeg = await pool.query("SELECT * FROM musteri_degerlendirmesi");
 
-        res.json(allTodos.rows)
+        res.json(alldeg.rows)
     } catch (error) {
         console.log(err.message);
     }
@@ -683,60 +768,59 @@ app.get("/todos", async (req, res) => {
 
 // Read
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/degerlendirme/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
+        const degerlendirme = await pool.query("SELECT * FROM musteri_degerlendirme WHERE degerlendirme_ID = $1",[id]);
 
-        res.json(Todo.rows[0])
+        res.json(degerlendirme.rows[0])
     } catch (error) {
         console.log(err.message);
     }
 })
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/degerendirme/:id", async (req, res) => {
     try {
         const { id } = req.params;  // where
-        const {description} = req.body; // set
+        let kisi_ID = req.query.kisiID
+        let puan = req.query.puan
+        const musteri_degerlendirme = await pool.query("UPDATE musteri_degerlendirme SET kisi_ID = $1 WHERE Puan = $2",[kisi_ID, puan]);
 
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
+        res.json("Musteri Degerlendirmesi updated");
     } catch (err) {
         console.error(err.message);
     }
 });
 
 // Delete
-app.delete("/todos/:id", async(req,res) => {
+app.delete("/degerlendirme/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
+        const deletedeg = await pool.query("DELETE FROM musteri_degerlendirme WHERE degerlendirme_ID = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
     }
 })
 
-// TABLE 12 // 
+// TABLE Ornek// 
 
-// Create
-app.post("/todos", async (req, res) => {
+app.post("/ornek", async (req, res) => {
     try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
+        const {adi} = req.body
+        const newornek = await pool.query("INSERT INTO ornek (ornek_ID) VALUES ($1) RETURNING *", [ad]);
+        res.json(newornek.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
 
-app.get("/todos", async (req, res) => {
+app.get("/ornek", async (req, res) => {
     try {
-        const allTodos = await pool.query("SELECT * FROM todo");
+        const allornek = await pool.query("SELECT * FROM basvuru");
 
-        res.json(allTodos.rows)
+        res.json(allbasvuru.rows)
     } catch (error) {
         console.log(err.message);
     }
@@ -745,540 +829,38 @@ app.get("/todos", async (req, res) => {
 
 // Read
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/basvuru/:id", async (req, res) => {
     const {id} = req.params
     try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
+        const basvuru = await pool.query("SELECT * FROM basvuru WHERE basvuru_ID = $1",[id]);
 
-        res.json(Todo.rows[0])
+        res.json(basvuru.rows[0])
     } catch (error) {
         console.log(err.message);
     }
 })
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/basvuru/:id", async (req, res) => {
     try {
         const { id } = req.params;  // where
-        const {description} = req.body; // set
+        const {adi} = req.body; // set
 
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
+        const updatebasvuru = await pool.query("UPDATE basvuru SET basvuruadi = $1 WHERE basvuru_ID = $2",[adi, id]);
 
-        res.json("Todo updated");
+        res.json("Basvuru updated");
     } catch (err) {
         console.error(err.message);
     }
 });
 
 // Delete
-app.delete("/todos/:id", async(req,res) => {
+app.delete("/basvuru/:id", async(req,res) => {
     try {
         const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
+        const deletebasvuru = await pool.query("DELETE FROM basvuru WHERE basvuru_ID = $1", [id]);
         res.json("Deleted succesfully!");
     } catch (err) {
         console.error(err.message);
     }
 })
-
-// TABLE 13 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 14 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 15 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 16 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 17 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 18 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 19 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-// TABLE 20 // 
-
-// Create
-app.post("/todos", async (req, res) => {
-    try {
-        const {description} = req.body
-        const newTodo = await pool.query("INSERT INTO todo (description) VALUES ($1) RETURNING *", [description]);
-        res.json(newTodo.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-app.get("/todos", async (req, res) => {
-    try {
-        const allTodos = await pool.query("SELECT * FROM todo");
-
-        res.json(allTodos.rows)
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-
-// Read
-
-app.get("/todos/:id", async (req, res) => {
-    const {id} = req.params
-    try {
-        const Todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1",[id]);
-
-        res.json(Todo.rows[0])
-    } catch (error) {
-        console.log(err.message);
-    }
-})
-
-// update a todo
-app.put("/todos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;  // where
-        const {description} = req.body; // set
-
-        const updateTodo = await pool.query("UPDATE todo SET description = $1 WHERE todo_id = $2",[description, id]);
-
-        res.json("Todo updated");
-    } catch (err) {
-        console.error(err.message);
-    }
-});
-
-// Delete
-app.delete("/todos/:id", async(req,res) => {
-    try {
-        const {id} = req.params;
-        const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
-        res.json("Deleted succesfully!");
-    } catch (err) {
-        console.error(err.message);
-    }
-})
-
-
-
-app.listen(5000, () => {
-    console.log("server is listening on 5000");
-} );
